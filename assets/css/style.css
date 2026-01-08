@@ -58,4 +58,43 @@
     margin-bottom: 8px;
     border-radius: 10px;
   }
-  
+  .board {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+}
+
+.column {
+  background: #f1f5f9;
+  border-radius: 12px;
+  padding: 8px;
+  min-width: 260px;
+}
+
+.column h3 {
+  margin: 8px;
+  font-size: 15px;
+}
+
+.cards {
+  min-height: 40px;
+}
+
+.card {
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+/* Пріоритети */
+.priority-high {
+  border-left: 4px solid #ef4444;
+}
+.priority-medium {
+  border-left: 4px solid #f59e0b;
+}
+.priority-low {
+  border-left: 4px solid #10b981;
+}
