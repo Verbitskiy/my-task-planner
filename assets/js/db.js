@@ -1,61 +1,42 @@
-/**
- * Простий wrapper над IndexedDB
- * Зберігає задачі локально на пристрої
- */
-
 const DB_NAME = 'task_planner_db';
-const DB_VERSION = 1;
-const STORE_TASKS = 'tasks';
+const DB_VERSION = 2;
+const STORE = 'boards';
 
 let db = null;
 
-// Відкриття БД
 export function openDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-    request.onerror = () => reject('Помилка відкриття БД');
+    request.onupgradeneeded = e => {
+      db = e.target.result;
 
-    request.onupgradeneeded = event => {
-      db = event.target.result;
-
-      if (!db.objectStoreNames.contains(STORE_TASKS)) {
-        const store = db.createObjectStore(STORE_TASKS, {
-          keyPath: 'id'
-        });
-
-        store.createIndex('priority', 'priority');
-        store.createIndex('createdAt', 'createdAt');
+      if (!db.objectStoreNames.contains(STORE)) {
+        db.createObjectStore(STORE, { keyPath: 'id' });
       }
     };
 
-    request.onsuccess = event => {
-      db = event.target.result;
-      resolve(db);
+    request.onsuccess = e => {
+      db = e.target.result;
+      resolve();
     };
+
+    request.onerror = () => reject('DB error');
   });
 }
 
-// Додати задачу
-export function addTask(task) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_TASKS, 'readwrite');
-    const store = tx.objectStore(STORE_TASKS);
-    store.add(task);
-
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject('Не вдалося додати задачу');
+export function saveBoard(board) {
+  return new Promise(resolve => {
+    const tx = db.transaction(STORE, 'readwrite');
+    tx.objectStore(STORE).put(board);
+    tx.oncomplete = resolve;
   });
 }
 
-// Отримати всі задачі
-export function getAllTasks() {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_TASKS, 'readonly');
-    const store = tx.objectStore(STORE_TASKS);
-    const request = store.getAll();
-
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject('Не вдалося отримати задачі');
+export function getBoards() {
+  return new Promise(resolve => {
+    const tx = db.transaction(STORE, 'readonly');
+    const req = tx.objectStore(STORE).getAll();
+    req.onsuccess = () => resolve(req.result);
   });
 }
