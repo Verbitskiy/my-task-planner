@@ -3,39 +3,59 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Task Planner</title>
+  <title>Планувальник задач</title>
 
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 </head>
 <body>
 
 <header>
-  <h1>🗂 Task Planner</h1>
+  <h1>🗂 Планувальник задач</h1>
   <span id="badge"></span>
 </header>
 
 <section class="add">
   <input id="taskInput" placeholder="Нова задача">
   <select id="priority">
-    <option value="low">Low</option>
-    <option value="normal" selected>Normal</option>
-    <option value="high">High</option>
+    <option value="low">Низький</option>
+    <option value="normal" selected>Середній</option>
+    <option value="high">Високий</option>
   </select>
+  <input type="datetime-local" id="reminder" style="width:160px;">
   <button id="addBtn">＋</button>
+</section>
+
+<section class="filters">
+  <select id="filterStatus">
+    <option value="all">Усі статуси</option>
+    <option value="todo">До виконання</option>
+    <option value="doing">В процесі</option>
+    <option value="done">Завершено</option>
+  </select>
+  <select id="filterPriority">
+    <option value="all">Усі пріоритети</option>
+    <option value="high">Високий</option>
+    <option value="normal">Середній</option>
+    <option value="low">Низький</option>
+  </select>
 </section>
 
 <section class="board">
   <div class="column" data-status="todo">
-    <h2>To do</h2>
+    <h2>До виконання</h2>
     <div class="list"></div>
   </div>
   <div class="column" data-status="doing">
-    <h2>Doing</h2>
+    <h2>В процесі</h2>
     <div class="list"></div>
   </div>
   <div class="column" data-status="done">
-    <h2>Done</h2>
+    <h2>Завершено</h2>
     <div class="list"></div>
   </div>
 </section>
