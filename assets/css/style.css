@@ -1,100 +1,83 @@
-:root {
-    --bg: #f9fafb;
-    --text: #111827;
-    --primary: #3b82f6;
-  }
-  
-  * {
-    box-sizing: border-box;
-  }
-  
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
-                 "Segoe UI", sans-serif;
-    background: var(--bg);
-    color: var(--text);
-  }
-  
-  /* Safe Area */
-  .app-header {
-    padding: env(safe-area-inset-top) 16px 12px;
-    background: white;
-    border-bottom: 1px solid #e5e7eb;
-  }
-  
-  .app-header h1 {
-    margin: 0;
-    font-size: 18px;
-  }
-  
-  .app-main {
-    padding: 20px 16px env(safe-area-inset-bottom);
-  }
-  
-  .hint {
-    font-size: 14px;
-    color: #6b7280;
-  }
-  .add-btn {
-    background: var(--primary);
-    color: white;
-    border: none;
-    padding: 12px;
-    width: 100%;
-    border-radius: 10px;
-    font-size: 16px;
-  }
-  
-  #task-list {
-    margin-top: 16px;
-    padding: 0;
-    list-style: none;
-  }
-  
-  #task-list li {
-    background: white;
-    padding: 12px;
-    margin-bottom: 8px;
-    border-radius: 10px;
-  }
-  .board {
+* {
+  box-sizing: border-box;
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f4f6f8;
+}
+
+.app-header {
+  background: #3b82f6;
+  color: white;
+  padding: 16px;
+  text-align: center;
+}
+
+.app {
+  padding: 16px;
+}
+
+.add-task {
   display: flex;
-  gap: 12px;
-  overflow-x: auto;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
-.column {
-  background: #f1f5f9;
-  border-radius: 12px;
-  padding: 8px;
-  min-width: 260px;
-}
-
-.column h3 {
-  margin: 8px;
-  font-size: 15px;
-}
-
-.cards {
-  min-height: 40px;
-}
-
-.card {
-  background: white;
+.add-task input,
+.add-task select,
+.add-task button {
   padding: 10px;
-  border-radius: 10px;
-  margin-bottom: 8px;
   font-size: 14px;
 }
 
-/* Пріоритети */
-.priority-high {
-  border-left: 4px solid #ef4444;
+.add-task input {
+  flex: 1;
 }
-.priority-medium {
-  border-left: 4px solid #f59e0b;
+
+.tasks ul {
+  list-style: none;
+  padding: 0;
 }
-.priority-low {
-  border-left: 4px solid #10b981;
+
+.task {
+  background: white;
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.task.high {
+  border-left: 6px solid #ef4444;
+}
+
+.task.medium {
+  border-left: 6px solid #f59e0b;
+}
+
+.task.low {
+  border-left: 6px solid #10b981;
+}
+
+.task button {
+  background: none;
+  border: none;
+  color: #ef4444;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.export-btn {
+  margin-top: 16px;
+  width: 100%;
+  padding: 12px;
+  background: #111827;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
 }
