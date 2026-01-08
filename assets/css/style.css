@@ -1,0 +1,39 @@
+:root {
+    --bg: #f9fafb;
+    --text: #111827;
+    --primary: #3b82f6;
+  }
+  
+  * {
+    box-sizing: border-box;
+  }
+  
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+                 "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  
+  /* Safe Area */
+  .app-header {
+    padding: env(safe-area-inset-top) 16px 12px;
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .app-header h1 {
+    margin: 0;
+    font-size: 18px;
+  }
+  
+  .app-main {
+    padding: 20px 16px env(safe-area-inset-bottom);
+  }
+  
+  .hint {
+    font-size: 14px;
+    color: #6b7280;
+  }
+  

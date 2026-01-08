@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+  <title>My Task Planner</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#3B82F6" />
+
+  <!-- iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Tasks" />
+
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
+
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+  <header class="app-header">
+    <h1>My Task Planner</h1>
+  </header>
+
+  <main class="app-main">
+    <p class="hint">
+      PWA встановлено ✅  
+      Далі тут з’являться дошки та задачі.
+    </p>
+  </main>
+
+  <script>
+    // Реєстрація Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', async () => {
+        try {
+          await navigator.serviceWorker.register('./sw.js');
+          console.log('✅ Service Worker зареєстрований');
+        } catch (err) {
+          console.error('❌ Service Worker error:', err);
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>
