@@ -1,54 +1,64 @@
-import { openDB } from './db.js';
-import { loadBoard, addCard } from './boards.js';
+const taskInput = document.getElementById("taskText");
+const prioritySelect = document.getElementById("taskPriority");
+const addBtn = document.getElementById("addTaskBtn");
+const list = document.getElementById("taskList");
+const exportBtn = document.getElementById("exportBtn");
 
-let board;
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 
-document.addEventListener('DOMContentLoaded', async () => {
-  await openDB();
-  board = await loadBoard();
-  renderBoard();
+render();
+
+addBtn.addEventListener("click", () => {
+  const text = taskInput.value.trim();
+  const priority = prioritySelect.value;
+
+  if (!text || tasks.length >= 100) return;
+
+  tasks.push({
+    id: Date.now(),
+    text,
+    priority
+  });
+
+  save();
+  taskInput.value = "";
 });
 
-function renderBoard() {
-  const root = document.getElementById('board');
-  root.innerHTML = '';
+exportBtn.addEventListener("click", () => {
+  const data = tasks.map(t => `[${t.priority}] ${t.text}`).join("\n");
+  const blob = new Blob([data], { type: "text/plain" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "tasks.txt";
+  link.click();
+});
 
-  board.lists.forEach(list => {
-    const col = document.createElement('div');
-    col.className = 'column';
+function render() {
+  list.innerHTML = "";
 
-    col.innerHTML = `
-      <h3>${list.title}</h3>
-      <div class="cards">
-        ${list.cards.map(renderCard).join('')}
-      </div>
-      <button onclick="addNewCard('${list.id}')">+ Додати</button>
+  const sorted = [...tasks].sort((a, b) => {
+    if (a.priority === "high") return -1;
+    if (b.priority === "high") return 1;
+    return 0;
+  });
+
+  sorted.forEach(task => {
+    const li = document.createElement("li");
+    li.className = `task ${task.priority}`;
+    li.innerHTML = `
+      <span>${task.text}</span>
+      <button onclick="removeTask(${task.id})">✕</button>
     `;
-
-    root.appendChild(col);
+    list.appendChild(li);
   });
 }
 
-function renderCard(card) {
-  return `
-    <div class="card priority-${card.priority}">
-      ${card.title}
-    </div>
-  `;
+function removeTask(id) {
+  tasks = tasks.filter(t => t.id !== id);
+  save();
 }
 
-window.addNewCard = function (listId) {
-  const title = prompt('Назва задачі');
-  if (!title) return;
-
-  const priority = prompt('Пріоритет: low / medium / high', 'medium');
-
-  addCard(board, listId, {
-    id: crypto.randomUUID(),
-    title,
-    priority,
-    createdAt: Date.now()
-  });
-
-  renderBoard();
-};
+function save() {
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+  render();
+}
