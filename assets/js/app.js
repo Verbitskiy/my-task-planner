@@ -8,6 +8,17 @@ let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 
 render();
 
+/* ---------- SERVICE WORKER ---------- */
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./sw.js");
+}
+
+/* ---------- NOTIFICATION PERMISSION ---------- */
+if ("Notification" in window && Notification.permission === "default") {
+  Notification.requestPermission();
+}
+
+/* ---------- ADD TASK ---------- */
 addBtn.addEventListener("click", () => {
   const text = taskInput.value.trim();
   const priority = prioritySelect.value;
@@ -20,10 +31,15 @@ addBtn.addEventListener("click", () => {
     priority
   });
 
+  if (priority === "high") {
+    notifyHighPriority(text);
+  }
+
   save();
   taskInput.value = "";
 });
 
+/* ---------- EXPORT ---------- */
 exportBtn.addEventListener("click", () => {
   const data = tasks.map(t => `[${t.priority}] ${t.text}`).join("\n");
   const blob = new Blob([data], { type: "text/plain" });
@@ -33,12 +49,13 @@ exportBtn.addEventListener("click", () => {
   link.click();
 });
 
+/* ---------- RENDER ---------- */
 function render() {
   list.innerHTML = "";
 
   const sorted = [...tasks].sort((a, b) => {
-    if (a.priority === "high") return -1;
-    if (b.priority === "high") return 1;
+    if (a.priority === "high" && b.priority !== "high") return -1;
+    if (b.priority === "high" && a.priority !== "high") return 1;
     return 0;
   });
 
@@ -53,15 +70,24 @@ function render() {
   });
 }
 
+/* ---------- REMOVE ---------- */
 function removeTask(id) {
   tasks = tasks.filter(t => t.id !== id);
   save();
 }
 
+/* ---------- SAVE ---------- */
 function save() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
   render();
 }
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./sw.js");
+
+/* ---------- iOS HIGH PRIORITY NOTIFICATION ---------- */
+function notifyHighPriority(text) {
+  if (!("Notification" in window)) return;
+  if (Notification.permission !== "granted") return;
+
+  new Notification("🔥 Високий пріоритет", {
+    body: text
+  });
 }
