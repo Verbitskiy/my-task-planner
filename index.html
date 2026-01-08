@@ -9,6 +9,7 @@
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
+  <script type="module" src="assets/js/app.js"></script>
   <meta name="theme-color" content="#3B82F6" />
 
   <!-- iOS -->
@@ -27,11 +28,10 @@
   </header>
 
   <main class="app-main">
-    <p class="hint">
-      PWA встановлено ✅  
-      Далі тут з’являться дошки та задачі.
-    </p>
+    <button class="add-btn" onclick="createTask()">➕ Додати задачу</button>
+    <ul id="task-list"></ul>
   </main>
+  
 
   <script>
     // Реєстрація Service Worker
