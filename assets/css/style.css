@@ -36,4 +36,26 @@
     font-size: 14px;
     color: #6b7280;
   }
+  .add-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px;
+    width: 100%;
+    border-radius: 10px;
+    font-size: 16px;
+  }
+  
+  #task-list {
+    margin-top: 16px;
+    padding: 0;
+    list-style: none;
+  }
+  
+  #task-list li {
+    background: white;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 10px;
+  }
   
