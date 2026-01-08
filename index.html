@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Task Planner</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>🗂 Task Planner</h1>
+  <span id="badge"></span>
+</header>
+
+<section class="add">
+  <input id="taskInput" placeholder="Нова задача">
+  <select id="priority">
+    <option value="low">Low</option>
+    <option value="normal" selected>Normal</option>
+    <option value="high">High</option>
+  </select>
+  <button id="addBtn">＋</button>
+</section>
+
+<section class="board">
+  <div class="column" data-status="todo">
+    <h2>To do</h2>
+    <div class="list"></div>
+  </div>
+  <div class="column" data-status="doing">
+    <h2>Doing</h2>
+    <div class="list"></div>
+  </div>
+  <div class="column" data-status="done">
+    <h2>Done</h2>
+    <div class="list"></div>
+  </div>
+</section>
+
+<script src="db.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
