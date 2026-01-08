@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Планувальник задач</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Планувальник задач</title>
 
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css">
-
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="style.css">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 </head>
 <body>
 
 <header>
   <h1>🗂 Планувальник задач</h1>
   <span id="badge"></span>
+  <button id="addColumnBtn">＋ Колонку</button>
 </header>
 
 <section class="add">
@@ -27,6 +27,7 @@
     <option value="high">Високий</option>
   </select>
   <input type="datetime-local" id="reminder" style="width:160px;">
+  <select id="columnSelect"></select>
   <button id="addBtn">＋</button>
 </section>
 
@@ -45,20 +46,30 @@
   </select>
 </section>
 
-<section class="board">
-  <div class="column" data-status="todo">
-    <h2>До виконання</h2>
-    <div class="list"></div>
+<section class="board" id="board"></section>
+
+<!-- Modal для задач -->
+<div id="taskModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2 id="modalTitle"></h2>
+    <textarea id="modalText" rows="3"></textarea>
+    <select id="modalPriority">
+      <option value="low">Низький</option>
+      <option value="normal">Середній</option>
+      <option value="high">Високий</option>
+    </select>
+    <div id="subtasks"></div>
+    <input type="text" id="newSubtask" placeholder="Нова підзадача">
+    <button id="addSubtaskBtn">＋</button>
+    <div id="comments"></div>
+    <input type="text" id="newComment" placeholder="Новий коментар">
+    <button id="addCommentBtn">＋</button>
+    <input type="file" id="uploadPhoto" accept="image/*">
+    <div id="photos"></div>
+    <button id="saveTaskBtn">Зберегти</button>
   </div>
-  <div class="column" data-status="doing">
-    <h2>В процесі</h2>
-    <div class="list"></div>
-  </div>
-  <div class="column" data-status="done">
-    <h2>Завершено</h2>
-    <div class="list"></div>
-  </div>
-</section>
+</div>
 
 <script src="db.js"></script>
 <script src="app.js"></script>
