@@ -1,36 +1,54 @@
-import { openDB, addTask, getAllTasks } from './db.js';
+import { openDB } from './db.js';
+import { loadBoard, addCard } from './boards.js';
+
+let board;
 
 document.addEventListener('DOMContentLoaded', async () => {
   await openDB();
-  renderTasks();
+  board = await loadBoard();
+  renderBoard();
 });
 
-async function renderTasks() {
-  const tasks = await getAllTasks();
-  const list = document.getElementById('task-list');
+function renderBoard() {
+  const root = document.getElementById('board');
+  root.innerHTML = '';
 
-  list.innerHTML = '';
+  board.lists.forEach(list => {
+    const col = document.createElement('div');
+    col.className = 'column';
 
-  tasks.forEach(task => {
-    const item = document.createElement('li');
-    item.textContent = `${task.title} (${task.priority})`;
-    list.appendChild(item);
+    col.innerHTML = `
+      <h3>${list.title}</h3>
+      <div class="cards">
+        ${list.cards.map(renderCard).join('')}
+      </div>
+      <button onclick="addNewCard('${list.id}')">+ Додати</button>
+    `;
+
+    root.appendChild(col);
   });
 }
 
-window.createTask = async function () {
+function renderCard(card) {
+  return `
+    <div class="card priority-${card.priority}">
+      ${card.title}
+    </div>
+  `;
+}
+
+window.addNewCard = function (listId) {
   const title = prompt('Назва задачі');
   if (!title) return;
 
   const priority = prompt('Пріоритет: low / medium / high', 'medium');
 
-  const task = {
+  addCard(board, listId, {
     id: crypto.randomUUID(),
     title,
     priority,
     createdAt: Date.now()
-  };
+  });
 
-  await addTask(task);
-  renderTasks();
+  renderBoard();
 };
