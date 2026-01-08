@@ -1,141 +1,162 @@
-const input = document.getElementById("taskInput");
-const prioritySelect = document.getElementById("priority");
-const addBtn = document.getElementById("addBtn");
-const badge = document.getElementById("badge");
+const input=document.getElementById("taskInput");
+const prioritySelect=document.getElementById("priority");
+const addBtn=document.getElementById("addBtn");
+const badge=document.getElementById("badge");
+const reminderInput=document.getElementById("reminder");
 
-const columns = {
+const filterStatus=document.getElementById("filterStatus");
+const filterPriority=document.getElementById("filterPriority");
+
+const columns={
   todo: document.querySelector('[data-status="todo"] .list'),
   doing: document.querySelector('[data-status="doing"] .list'),
   done: document.querySelector('[data-status="done"] .list')
 };
 
-let tasks = [];
+let tasks=[];
+let draggedTaskId=null;
+let accordionState={};
 
-// --- Notification for high-priority tasks ---
-function notifyHigh(text) {
-  if (Notification.permission === "granted") {
-    new Notification("🔥 High priority", { body: text });
-  }
+// --- Notification ---
+function notifyHigh(task){
+  if(!("Notification" in window) || Notification.permission!=="granted") return;
+  const options={
+    body: task.text,
+    tag: "high_"+task.id,
+    renotify:true,
+    requireInteraction:true,
+    actions:[{action:"done",title:"Виконано"}]
+  };
+  navigator.serviceWorker.getRegistration().then(reg=>reg.showNotification("🔥 Високий пріоритет",options));
 }
 
-// --- Render all tasks ---
-function render() {
-  Object.values(columns).forEach(c => c.innerHTML = "");
-  let highCount = 0;
-
-  // Сортування: high зверху
-  const sortedTasks = [...tasks].sort((a, b) => {
-    if (a.status === b.status) {
-      if (a.priority === "high" && b.priority !== "high") return -1;
-      if (b.priority === "high" && a.priority !== "high") return 1;
+// --- Schedule reminder ---
+function scheduleReminder(task){
+  if(!task.reminder || task.status==="done") return;
+  const check=()=>{
+    if(task.status!=="done"){
+      notifyHigh(task);
+      setTimeout(check,15*60*1000);
     }
-    return 0;
+  };
+  const delay=new Date(task.reminder)-new Date();
+  setTimeout(check,delay>0?delay:0);
+}
+
+// --- Accordion ---
+function saveAccordionState(){ localStorage.setItem("accordionState",JSON.stringify(accordionState)); }
+function loadAccordionState(){ accordionState=JSON.parse(localStorage.getItem("accordionState")||"{}"); }
+
+// --- Render ---
+function render(){
+  Object.values(columns).forEach(c=>c.innerHTML="");
+  let highCount=0;
+
+  let filteredTasks=tasks.filter(t=>{
+    if(filterStatus.value!=="all" && t.status!==filterStatus.value) return false;
+    if(filterPriority.value!=="all" && t.priority!==filterPriority.value) return false;
+    return true;
   });
 
-  sortedTasks.forEach(t => {
-    const div = document.createElement("div");
-    div.className = "task " + t.priority;
-    div.innerHTML = `
+  filteredTasks.sort((a,b)=>({"high":0,"normal":1,"low":2}[a.priority]-{"high":0,"normal":1,"low":2}[b.priority]));
+
+  filteredTasks.forEach(t=>{
+    const div=document.createElement("div");
+    div.className="task "+t.priority;
+    div.setAttribute("draggable","true");
+    div.dataset.id=t.id;
+
+    div.innerHTML=`
       <b>${t.text}</b>
       <small>${t.priority}</small>
-
-      <div class="subtasks">
-        <ul>
-          ${t.subtasks?.map((st, i) => `<li>
-            <input type="checkbox" data-index="${i}" ${st.done ? "checked" : ""}>
-            ${st.text}
-          </li>`).join("") || ""}
-        </ul>
-        <input placeholder="Нова підзадача" class="subtask-input">
-        <button class="add-subtask">＋</button>
-      </div>
-
-      <div class="comments">
-        <ul>
-          ${t.comments?.map(c => `<li>${c}</li>`).join("") || ""}
-        </ul>
-        <input placeholder="Коментар" class="comment-input">
-        <button class="add-comment">＋</button>
-      </div>
+      ${t.reminder?`<small>Нагадування: ${new Date(t.reminder).toLocaleString()}</small>`:""}
+      <button class="delete-btn">✕</button>
     `;
 
-    // Зміна статусу при кліку на задачу
-    div.querySelector("b").onclick = () => {
-      t.status = t.status === "todo" ? "doing" : t.status === "doing" ? "done" : "todo";
-      saveTask(t);
+    div.querySelector(".delete-btn").onclick=()=>{
+      tasks=tasks.filter(task=>task.id!==t.id);
+      deleteTask(t.id);
       render();
     };
 
-    // Додавання підзадач
-    const addSubBtn = div.querySelector(".add-subtask");
-    addSubBtn.onclick = () => {
-      const subInput = div.querySelector(".subtask-input");
-      if (!subInput.value) return;
-      t.subtasks = t.subtasks || [];
-      t.subtasks.push({ text: subInput.value, done: false });
-      saveTask(t);
-      render();
+    div.querySelector("b").onclick=()=>{
+      t.status=t.status==="todo"?"doing":t.status==="doing"?"done":"todo";
+      saveTask(t); render();
     };
 
-    // Відмітка підзадач
-    div.querySelectorAll(".subtasks input[type=checkbox]").forEach(checkbox => {
-      checkbox.onchange = (e) => {
-        const idx = e.target.dataset.index;
-        t.subtasks[idx].done = e.target.checked;
-        saveTask(t);
-      };
+    div.addEventListener("dragstart",e=>{
+      draggedTaskId=t.id;
+      div.classList.add("dragging");
+    });
+    div.addEventListener("dragend",e=>{
+      draggedTaskId=null;
+      div.classList.remove("dragging");
     });
 
-    // Додавання коментарів
-    const addCommentBtn = div.querySelector(".add-comment");
-    addCommentBtn.onclick = () => {
-      const commentInput = div.querySelector(".comment-input");
-      if (!commentInput.value) return;
-      t.comments = t.comments || [];
-      t.comments.push(commentInput.value);
-      saveTask(t);
-      render();
-    };
-
     columns[t.status].appendChild(div);
-    if (t.priority === "high") highCount++;
+    if(t.priority==="high") highCount++;
   });
 
-  badge.textContent = highCount || "";
+  Object.values(columns).forEach(col=>{
+    const parent=col.parentElement;
+    parent.addEventListener("dragover",e=>{ e.preventDefault(); parent.classList.add("drag-over"); });
+    parent.addEventListener("dragleave",e=>{ parent.classList.remove("drag-over"); });
+    parent.addEventListener("drop",e=>{
+      e.preventDefault(); parent.classList.remove("drag-over");
+      if(!draggedTaskId) return;
+      const task=tasks.find(t=>t.id==draggedTaskId);
+      task.status=parent.dataset.status;
+      saveTask(task); render();
+    });
+  });
+
+  badge.textContent=highCount||"";
 }
 
-// --- Додавання нової задачі ---
-addBtn.onclick = async () => {
-  if (!input.value || tasks.length >= 100) return;
+// --- Add task ---
+addBtn.onclick=async()=>{
+  if(!input.value || tasks.length>=100) return;
 
-  const task = {
-    id: Date.now(),
-    text: input.value,
-    priority: prioritySelect.value,
-    status: "todo",
-    subtasks: [],
-    comments: []
+  const task={
+    id:Date.now(),
+    text:input.value,
+    priority:prioritySelect.value,
+    status:"todo",
+    subtasks:[],
+    comments:[],
+    reminder:reminderInput.value?new Date(reminderInput.value).toISOString():null
   };
 
   tasks.push(task);
   await saveTask(task);
+  if(task.priority==="high") notifyHigh(task);
+  scheduleReminder(task);
 
-  if (task.priority === "high") notifyHigh(task.text);
-
-  input.value = "";
+  input.value="";
+  reminderInput.value="";
   render();
 };
 
-// --- Ініціалізація ---
-(async () => {
-  tasks = await getAllTasks();
+// --- Filters ---
+filterStatus.onchange=render;
+filterPriority.onchange=render;
+
+// --- Init ---
+(async()=>{
+  loadAccordionState();
+  tasks=await getAllTasks();
+  tasks.forEach(t=>scheduleReminder(t));
   render();
 
-  if ("Notification" in window && Notification.permission === "default") {
-    Notification.requestPermission();
-  }
-
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js");
-  }
+  if("Notification" in window && Notification.permission==="default") Notification.requestPermission();
+  if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
 })();
+
+// --- Handle SW message (mark done) ---
+navigator.serviceWorker.addEventListener("message",e=>{
+  if(e.data.action==="markDone"){
+    const id=parseInt(e.data.tag.replace("high_",""));
+    const task=tasks.find(t=>t.id===id);
+    if(task){ task.status="done"; saveTask(task); render(); }
+  }
+});
