@@ -62,3 +62,6 @@ function save() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
   render();
 }
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./sw.js");
+}
